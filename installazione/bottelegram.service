@@ -1,0 +1,9 @@
+
+[Unit]
+Description=ciao
+After=mysql.service
+
+[Service]
+ExecStart=/home/giacomo/appgroppi/botaudiotelegram/dist/ricerca
+[Install]
+WantedBy=network-online.target

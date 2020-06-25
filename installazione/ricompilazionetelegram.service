@@ -1,0 +1,9 @@
+
+[Unit]
+Description=Programma che ricompila telegram
+After=mysql.service
+
+[Service]
+ExecStart=/bin/bash /home/giacomo/appgroppi/botaudiotelegram/installazione.sh
+[Install]
+WantedBy=network-online.target
