@@ -6,15 +6,19 @@ import mysql.connector
 
 ipdatabase = ''
 
-
-db = 'bottelegram'
-user = '' # nome utente del db
-password = '' # Password del db 
+db = ''
+user = ''
+password = ''
 
 def update(tabella, campodamodificare, valoredaimmettere, campoquando, valorequando):
     query = "update " + str(tabella) + " set "+ str(campodamodificare) + " = '" + str(valoredaimmettere) + "' where " + str(campoquando) +"='" + str(valorequando) + "'"
     
-    connection = mysql.connector.connect(host=ipdatabase, database=db, user=user, password=password)
+    connection = mysql.connector.connect(
+        host=ipdatabase, 
+        database=db, 
+        user=user, 
+        password=password
+    )
     
     cursor = connection.cursor()
     cursor.execute(query)
