@@ -1,3 +1,5 @@
+#versione 25 giugno
+
 try:
     import da_importare
 except:
@@ -750,7 +752,7 @@ def audio_translator(bot, msg, chat_id, content_type, nome):
     #elif content_type == 'video_note':
     add_db(chat_id, content_type)
 
-    os.system("rm -r " + chat_id + "*")
+    os.system("rm -r " + str(chat_id) + "*")
 
 
 def add_db(chat_id, content_type = None, lingua = None):
@@ -1105,6 +1107,10 @@ def on_chat_message(msg):
 
 language = 'en-GB'
 bot = telepot.Bot(TOKEN)
+try:
+    bot.sendMessage(chat_id_admin1, "online")
+except:
+    pass
 bot.message_loop(on_chat_message)
 
 
