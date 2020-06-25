@@ -917,7 +917,21 @@ def on_chat_message(msg):
         elif msg['text'] == '/aggiornamento' and (int(chat_id) == int(chat_id_admin1) or int(chat_id) == int(chat_id_admin2)):
             anno_mese_giorno = str(datetime.now())[:10]
             if len(libreria.selectcondizionatodato(tabellaaggiornamento, "giorno", str(anno_mese_giorno))) == 0:
-                libreria.insertdue(tabellaaggiornamento, ["giorno", "audiotradotti", "personeregistrate", "fototradotte"], [str(anno_mese_giorno), str(0), str(0), str(0)])
+                libreria.insertdue(
+                    tabellaaggiornamento, 
+                    ["giorno", 
+                    "audiotradotti", 
+                    "personeregistrate", 
+                    "fototradotte",
+                    "video_messaggi_tradotti",
+                    "video_tradotti"], 
+                    
+                    [str(anno_mese_giorno), 
+                    str(0), 
+                    str(0), 
+                    str(0),
+                    str(0),
+                    str(0)])
 
             risultato = libreria.selectcompleta(tabellaaggiornamento)
             for x in risultato:
@@ -928,20 +942,23 @@ def on_chat_message(msg):
                     audio_tradotti = str(x[1])
                     persone_registrate = str(x[2])
                     foto_tradotte = str(x[3])
+                    video_messaggi_tradotti = str(x[4])
+                    video_tradotti = str(x[5])
 
                     risultato_utenti = libreria.selectcompleta(tabella)
                     
                     audio_tradotti_totali = 0
                     foto_tradotte_totali = 0
+                    video_messaggi_tradotti_totali = 0
+                    video_tradotti_totali = 0
 
                     for k in risultato_utenti:
                         audio_tradotti_totali = audio_tradotti_totali + int(k[2])
-                        try: 
-                            foto_tradotte_totali = foto_tradotte_totali + int(k[3])
-                        except:
-                            pass
+                        foto_tradotte_totali = foto_tradotte_totali + int(k[3])
+                        video_messaggi_tradotti_totali = video_messaggi_tradotti_totali + int(k[4])
+                        video_tradotti_totali = video_tradotti_totali + int(k[5])
 
-                    testo = 'Audio tradotti oggi: ' + audio_tradotti + "\nPersone registrate oggi: " + persone_registrate + "\nFoto tradotte oggi: " + str(foto_tradotte) +"\n\nUtenti in totale: " + str(len(risultato_utenti)) + "\nAudio totali: " + str(audio_tradotti_totali) + "\nFoto tradotte in totale: " + str(foto_tradotte_totali)
+                    testo = 'Audio tradotti oggi: ' + audio_tradotti + "\nPersone registrate oggi: " + persone_registrate + "\nFoto tradotte oggi: " + str(foto_tradotte) +"\nVideo messaggi tradotti: " + str(video_messaggi_tradotti) +"\nVideo tradotti: " + str(video_tradotti) +"\n\nUtenti in totale: " + str(len(risultato_utenti)) + "\nAudio totali: " + str(audio_tradotti_totali) + "\nFoto tradotte in totale: " + str(foto_tradotte_totali) + "\nVideo tradotti: " + str(video_messaggi_tradotti_totali) + "\nVideo tradotti in totale: " + str(video_tradotti_totali)
                     bot.sendMessage(chat_id, testo)
                     break
 
