@@ -38,8 +38,8 @@ import riconoscimento_lingua as ric_ling
 from audio_ritorno import riconoscimento
 
 
-chat_id_admin1 = '56248707'
-chat_id_admin2 = '632278771'
+chat_id_admin1 = ''
+chat_id_admin2 = ''
 
 
 VERSIONE = 'stable'
@@ -49,11 +49,11 @@ VERSIONE = 'testing'
 if VERSIONE == 'stable':
     tabella = 'utenti'
     tabellaaggiornamento = 'statistiche'
-    TOKEN = '1009631806:AAFpgcaWP_RHX-OX0YCL3tx-gk9jOW8nvPw' #STABLE
+    TOKEN = '' #STABLE
 else:
     tabella = 'utenti2'
     tabellaaggiornamento = 'statistiche2'
-    TOKEN = '1209826045:AAENBP4T8lTvu-tWqrj7srEEElN09C9lhj8' #TESTING
+    TOKEN = '' #TESTING
 
 
 lingue = {
