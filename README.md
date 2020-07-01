@@ -3,6 +3,8 @@ This is a python3 script, that work with API's telegram bot, to convert image an
 This is a script, written in python, that can translate audio, photo, video message, video, into text.
 He also understand were, during the audio, there are moment of silent, and he substitute them with commas
 
+It also work on gnu/linux, macos, and on windows. [also in ARM architecture]
+
 ## Getting Started
 
 To execute the project all you need are:
