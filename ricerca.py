@@ -853,7 +853,7 @@ def add_db(chat_id, content_type = None, lingua = None):
             "giorno", 
             anno_mese_giorno
             )
-    elif lingua is not None and content_type is None:
+    elif lingua is not None and content_type is None and not verificachat(chat_id):
         """
         insert per le persone che si iscrivono e fanno /start
         """
