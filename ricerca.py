@@ -38,27 +38,35 @@ import riconoscimento_lingua as ric_ling
 from audio_ritorno import riconoscimento
 
 
-chat_id_admin1 = ''
-chat_id_admin2 = ''
-
-
 VERSIONE = 'stable'
 VERSIONE = 'testing'
+
+
+with open("config.json",) as f:
+    data = json.load(f)
+
+
+#chat_id_admin1 = '56248707'
+#chat_id_admin2 = '632278771'
+
+chat_id_admin1 = data['chat_id_admin1']
+chat_id_admin2 = data['chat_id_admin2']
 
 #controlla la versione e setta i nomi delle tabelle in base a cosa è direzionata la versione attuale del file
 if VERSIONE == 'stable':
     tabella = 'utenti'
     tabellaaggiornamento = 'statistiche'
-    TOKEN = '' #STABLE
+    #TOKEN = '' #STABLE
+    TOKEN = data['token_stable']
 else:
     tabella = 'utenti2'
     tabellaaggiornamento = 'statistiche2'
-    TOKEN = '' #TESTING
-
+    #TOKEN = '' #TESTING
+    TOKEN = data['token_unstable']
 
 lingue = {
     'it-IT': '/Italiano',
-    'ar-IL': '/Arabic',  
+    'ar-IL': '/Arabic',
     'de-DE': '/German',
     'en-GB': '/English',
     'es-ES': '/Spanish',
@@ -73,21 +81,21 @@ lingue = {
     'tr-TR': '/Turkish',
     'bg-BG': '/Bulgarian',
     'ca-ES': '/Catalan',
-    'cs-CZ': '/Czech', 
+    'cs-CZ': '/Czech',
     'da-DK': '/Danish',
     'el-GR': '/Greek',
     'fi-FI': '/Finnish',
     'hi-IN': '/Hindi',
     'hr-HR': '/Croatian',
     'hu-HU': '/Hungarian',
-    'id-ID': '/Indonesian', 
-    'lt-LT': '/Lithuanian', 
-    'pt-PT': '/Portuguese', 
+    'id-ID': '/Indonesian',
+    'lt-LT': '/Lithuanian',
+    'pt-PT': '/Portuguese',
     'ro-RO': '/Romanian',
-    'sk-SK': '/Slovak', 
+    'sk-SK': '/Slovak',
     'sl-SI': '/Slovenian',
-    'sr-RS': '/Serbian', 
-    'uk-UA': '/Ukrainian', 
+    'sr-RS': '/Serbian',
+    'uk-UA': '/Ukrainian',
     'vi-VN': '/Vietnamese'
 }
 
@@ -103,7 +111,7 @@ def pubblicita(chat_id, bot, msg):
     language = libreria.selectcondizionato(tabella, "chat_id", chat_id, "lingua")[0][0]
     testo = traduttore('Se vuoi aiutarci nello sviluppo e nel mantenimento di questo bot /donate anche solo un caffè è ben accetto!\n\nPer info sulle sponsorizzazioni', language) +" /sponsor"
     bot.sendMessage(chat_id, testo)
-    
+
 def pubblicitadonate(chat_id, bot, msg):
     language = libreria.selectcondizionato(tabella, "chat_id", chat_id, "lingua")[0][0]
     testo = traduttore('se vuoi aiutarci nello sviluppo e nel mantenimento di questo bot /donate anche solo un caffè è ben accetto! Usa paypal.', language) +"\n paypal.me/Ticozzi"
@@ -115,16 +123,16 @@ def admin(chat_id, bot, msg):
     with open("utenti.txt", 'w') as f:
         for x in risultato:
             f.write(str(x) + "\n")
-    
+
     try:
         f.close()
     except:
         pass
 
-    
-    
+
+
     bot.sendDocument(chat_id, open("utenti.txt", 'rb'))
-    
+
     os.system("rm -r utenti.txt")
 
 def verificachat(chat_id):
@@ -134,7 +142,7 @@ def verificachat(chat_id):
     """
     if len(libreria.selectcondizionatodato(tabella, "chat_id", chat_id)) == 0:
         #vuol dire che non ci sono utenti
-        return False 
+        return False
     else:
         return True
 
@@ -144,9 +152,9 @@ def start(chat_id, bot, msg, verifica, verificatraduzione):
         if verifica:
             language = libreria.selectcondizionato(tabella, "chat_id", chat_id, "lingua")[0][0]
             bot.sendMessage(
-                chat_id, 
+                chat_id,
                 (traduttore(("Ben tornato, la lingua che hai impostato precedentemente è "),language) + " " + str(lingue[str(language)])[1:] + "\n "+ traduttore("Se vuoi modificarla digita",language) + " /setlanguage"))
-        
+
         else:
             language_chat = msg['from']['language_code']
             controllo = False
@@ -155,27 +163,27 @@ def start(chat_id, bot, msg, verifica, verificatraduzione):
                 if x[:2] == language_chat:
                     language = x #se viene modificata qua vuol dire che ha riconosciuto che lingua è [nella maggior parte dei casi la prende]
                     controllo = True #se True vuol dire che ha riconosciuto la lingua
-            
+
             if controllo:
                 bot.sendMessage(chat_id, traduttore("Ho capito dai tuoi settaggi di telegram che parli ",language) + " " +str(lingue[language])[1:] + "\n\n" + traduttore("Se vuoi cambiarla digita",language) + " /setlanguage " + traduttore("per cambiare lingua",language))
-                
+
             else:
                 messaggio = 'Welcome\nChoose your language: \n'
                 for x in lingue:
                     messaggio += lingue[x] + "\n"
                 bot.sendMessage(chat_id, messaggio)
-            
-            
-            
+
+
+
             #libreria.insertdue(tabella, ["chat_id", "lingua","audio", "foto"], [chat_id, language, "0", "0"])
-            
-            
+
+
             """
             Inserimento nella tabella di aggiornamento
             """
             #anno_mese_giorno = str(datetime.now())[:10]
 
-            #try:#in caso non esistesse il record prima prova a inserirlo, in caso non esiste lo inserisce lui   
+            #try:#in caso non esistesse il record prima prova a inserirlo, in caso non esiste lo inserisce lui
             #    persone_registrate_oggi = libreria.selectcondizionato(tabellaaggiornamento, "giorno", str(anno_mese_giorno), "personeregistrate")[0][0]
             #    libreria.update(tabellaaggiornamento, "personeregistrate", str(int(persone_registrate_oggi)+1), "giorno", str(anno_mese_giorno))
             #except:
@@ -190,10 +198,10 @@ def start(chat_id, bot, msg, verifica, verificatraduzione):
         #    if x[:2] == language_chat:
         #        language = x #se viene modificata qua vuol dire che ha riconosciuto che lingua è [nella maggior parte dei casi la prende]
         #        controllo = True #se True vuol dire che ha riconosciuto la lingua
-        #    
-        #bot.sendMessage(chat_id, traduttore("Ho capito dai tuoi settaggi di telegram che parli",language) + " " +str(lingue[language])[1:] + "\n\n" + traduttore("Se vuoi cambiarla digita",language) + " /setlanguage " + traduttore("per cambiare lingua",language)) 
+        #
+        #bot.sendMessage(chat_id, traduttore("Ho capito dai tuoi settaggi di telegram che parli",language) + " " +str(lingue[language])[1:] + "\n\n" + traduttore("Se vuoi cambiarla digita",language) + " /setlanguage " + traduttore("per cambiare lingua",language))
     add_db(chat_id,lingua=language)
-    
+
 
 
 
@@ -204,7 +212,7 @@ def traduttore (text,language):
     stringa = translator.translate(text, dest=language)
 
     return str(stringa.text)
-    
+
 
 def adminstatistiche(chat_id, bot, msg, file_id, nomefiletemporaneo):
     """
@@ -213,7 +221,7 @@ def adminstatistiche(chat_id, bot, msg, file_id, nomefiletemporaneo):
     if file_id and nomefiletemporaneo:
         percentuale = msg['caption'][17:22]
         testo = msg['caption'][22:]
-    else:    
+    else:
         percentuale = msg['text'][17:21]
         testo = msg['text'][22:]
 
@@ -222,7 +230,7 @@ def adminstatistiche(chat_id, bot, msg, file_id, nomefiletemporaneo):
 
     risultato = libreria.selectcompleta(tabella)
     numeroquery = len(risultato) #risultato della query
-    quanti = int(numeroquery * percentuale) 
+    quanti = int(numeroquery * percentuale)
 
     print(quanti)
     #non costruisce l'array grosso come quante persone devono ricevere la pubblicità, in quanto basta che vengano aggiunti elementi con chat_idarray.extend(())
@@ -231,31 +239,31 @@ def adminstatistiche(chat_id, bot, msg, file_id, nomefiletemporaneo):
 
     #costruzione dell'array randomico
     numero_randomico = []
-    
+
     k = 0 #contatore per il ciclo dopo
-    
-    while True:  
+
+    while True:
         if k == quanti:
             break
             #può uscire dal ciclo perchè vuol dire che ha finito di inserire numeri all'interno dell'array
-        
+
         temporaneo = random.randint(0,len(risultato)-1)
         controllo = True
 
-        
+
         for x in numero_randomico:
             if temporaneo == x:
                 controllo = False
                 break
-                
+
         if controllo:
             #deve aggiungere a numero_randomico il numero
             numero_randomico.append(temporaneo)
             k += 1
-            
+
 
     #manda il messaggio a tutte le persone
-    messaggi_errore = []    
+    messaggi_errore = []
     for x in numero_randomico:
         try:
             dainserire = risultato[x][0]
@@ -264,10 +272,10 @@ def adminstatistiche(chat_id, bot, msg, file_id, nomefiletemporaneo):
             messaggi_errore.append(str(e))
 
 
-    
+
     #manda i messaggi
     for x in risultato:
-        try:    
+        try:
             chat_id = int(x[0])
             if nomefiletemporaneo and file_id:
                 """
@@ -280,7 +288,7 @@ def adminstatistiche(chat_id, bot, msg, file_id, nomefiletemporaneo):
                 Vuol dire che non ci sono file da mandare come testo o altro
                 """
                 pass
-            language = libreria.selectcondizionato(tabella, "chat_id", chat_id, "lingua")[0][0] 
+            language = libreria.selectcondizionato(tabella, "chat_id", chat_id, "lingua")[0][0]
             testo_tradotto = traduttore(testo, language)
             bot.sendMessage(chat_id, testo_tradotto)
         except Exception as e:
@@ -289,7 +297,7 @@ def adminstatistiche(chat_id, bot, msg, file_id, nomefiletemporaneo):
 
     """
     Manda i messaggi di errore
-    """    
+    """
     if not messaggi_errore:
         bot.sendMessage(chat_id_admin1, "messaggio inviato correttamente, abbiamo inviato il messaggio a: " + str(quanti) + " persone")
         bot.sendMessage(chat_id_admin2, "messaggio inviato correttamente, abbiamo inviato il messaggio a: " + str(quanti) + " persone")
@@ -297,8 +305,8 @@ def adminstatistiche(chat_id, bot, msg, file_id, nomefiletemporaneo):
         #costruzione del messaggio di errore
         for x in messaggi_errore:
             testo_admin = x + "\n" #così mette a capo a ogni errore
-        bot.sendMessage(int(chat_id_admin1), str(testo_admin))   
-        bot.sendMessage(int(chat_id_admin2), str(testo_admin)) 
+        bot.sendMessage(int(chat_id_admin1), str(testo_admin))
+        bot.sendMessage(int(chat_id_admin2), str(testo_admin))
 
         bot.sendMessage(chat_id_admin1, "messaggio inviato a " + str(quanti - len(messaggi_errore)))
         bot.sendMessage(chat_id_admin2, "messaggio inviato a " + str(quanti - len(messaggi_errore)))
@@ -307,13 +315,13 @@ def adminstatistiche(chat_id, bot, msg, file_id, nomefiletemporaneo):
     if nomefiletemporaneo and file_id:
         #c'è da eliminare la foto
         os.system("rm -r " + str(nomefiletemporaneo) + ".png")
-        
+
     try:
         del chat_id, testo, numero_randomico, bot, numeroquery, controllo, quanti, x, risultato, percentuale
     except Exception as e:
         print("Errore nell'eliminazione delle variabili: ", e)
 
-    
+
 
 
 def amministratorefoto(bot, msg, chat_id):
@@ -321,7 +329,7 @@ def amministratorefoto(bot, msg, chat_id):
     Controllo se la foto che è stata mandata è stata mandata era
     sia da parte dell'admin uno e due.
 
-    Controllo successivo se è presente il /messaggioatutto [per mandare il 
+    Controllo successivo se è presente il /messaggioatutto [per mandare il
     messaggio a tutte le persone iscritte al bot]
     """
     if str(chat_id) == str(chat_id_admin1) or str(chat_id) == str(chat_id_admin2):
@@ -334,7 +342,7 @@ def amministratorefoto(bot, msg, chat_id):
                 except:
                     file_id = msg['photo'][0]['file_id']
                 bot.download_file(file_id, nomefiletemporaneo+".png")
-                
+
                 adminstatistiche(chat_id, bot, msg, file_id, nomefiletemporaneo)
 
                 return False #vuol dire che ha recepito il fatto che era un /messaggioatutti
@@ -345,7 +353,7 @@ def amministratorefoto(bot, msg, chat_id):
             bot.sendMessage(chat_id_admin1, str(e))
             bot.sendMessage(chat_id_admin2, str(e))
             return True
-    
+
     else:
         return True #serve per non far fare il controllo
 
@@ -355,8 +363,8 @@ def riconoscimentofoto(bot, msg, chat_id):
     Riconoscimento di scritte e testo all'interno dell'immagine
     """
     language = libreria.selectcondizionato(tabella, "chat_id", chat_id, "lingua")[0][0]
-    
-    
+
+
     messaggio = bot.sendMessage(
         chat_id,
         traduttore(
@@ -373,7 +381,7 @@ def riconoscimentofoto(bot, msg, chat_id):
         errori_traduzione.append(e)
         file_id = msg['photo'][0]['file_id']
     bot.download_file(file_id, nomefiletemporaneo+".png")
-                
+
     img = cv2.imread(nomefiletemporaneo + ".png")
 
     url_api = "https://api.ocr.space/parse/image"
@@ -389,7 +397,7 @@ def riconoscimentofoto(bot, msg, chat_id):
     risultato = json.loads(result)
 
     verifica = True
-    try: 
+    try:
         parsed_results = risultato.get("ParsedResults")[0]
     except Exception as e:
         errori_traduzione.append(e)
@@ -400,7 +408,7 @@ def riconoscimentofoto(bot, msg, chat_id):
     except Exception as e:
         errori_traduzione.append(e)
         verifica = False
-    
+
     bot.deleteMessage((chat_id,int(messaggio['message_id'])))
     """
     Dopo aver controllato il risultato della foto manda la traduzione
@@ -414,22 +422,22 @@ def riconoscimentofoto(bot, msg, chat_id):
         language = libreria.selectcondizionato(tabella, "chat_id", chat_id, "lingua")[0][0]
         bot.sendMessage(chat_id, traduttore("Scusami non sono riuscito a tradurre il testo, prova a ritagliare meglio la foto",language))
 
-    
+
     os.system("rm -r " + nomefiletemporaneo + ".png")
-    
+
     if verifica == False and verifica is not None:
         for errori_temporaneo in errori_traduzione:
             bot.sendMessage(chat_id_admin1, errori_temporaneo)
-    
+
 
     anno_mese_giorno = str(datetime.now())[:10]
 
-    #try:#in caso non esistesse il record prima prova a inserirlo, in caso non esiste lo inserisce lui   
+    #try:#in caso non esistesse il record prima prova a inserirlo, in caso non esiste lo inserisce lui
     #    foto_tradotte = libreria.selectcondizionato(tabellaaggiornamento, "giorno", str(anno_mese_giorno), "fototradotte")[0][0]
     #    libreria.update(tabellaaggiornamento, "fototradotte", str(int(foto_tradotte)+1), "giorno", str(anno_mese_giorno))
     #except:
     #    libreria.insertdue(tabellaaggiornamento, ["giorno", "audiotradotti", "personeregistrate", "fototradotte"], [str(anno_mese_giorno), str(0), "0", "1"])
-    
+
     #foto_tradotte = libreria.selectcondizionato(tabella, "chat_id", str(chat_id), "foto")[0][0]
 
 
@@ -450,12 +458,12 @@ def riconoscimentofoto(bot, msg, chat_id):
 def ricompilazione(bot, msg, chat_id):
     """
     Non serve l'autentificazione con sudo in quanto viene eseguito come un superuser [da systemd]
-    
+
     You can not have superuser to restart the service because it will execute with systemd
     """
     bot.sendMessage(chat_id, "inizio a compilare")
     os.system("systemctl restart ricompilazionetelegram.service > log_ricompilazione.txt")
-    
+
     with open("log_ricompilazione.txt") as f:
         testo_log_ricompilazione = f.readlines()
 
@@ -471,29 +479,29 @@ def salvataggio_file_py(bot, msg, chat_id, content_type):
     Salvataggio del file in locale
     E Ricompilazione con il restart del bot da remoto
     sudo systemctl restart ricompilazionetelegram.service
-    
+
     Download the file in the path folder
     ricompilation and restart of systemd service [ricompilazionetelegram.service]
     """
 
     try:
         file_id = msg['document']['file_id']
-        
+
         nome_temporaneo = 'ricerca_copia.py'
 
         os.system("rm -r /home/ubuntu/bottelegram/ricerca.py")
 
         bot.sendMessage(chat_id, "Ricevuto")
-        bot.download_file(file_id, str(nome_temporaneo))  
+        bot.download_file(file_id, str(nome_temporaneo))
 
         os.system("mv ricerca.py /home/ubuntu/bottelegram/ricerca.py")
-        
+
         ricompilazione(bot, msg, chat_id)
 
         return True, True
     except Exception as e:
         return False, e
-    
+
 def audio_translator(bot, msg, chat_id, content_type, nome):
     language = libreria.selectcondizionato(tabella, "chat_id", chat_id, "lingua")[0][0]
     messaggio = bot.sendMessage(
@@ -508,23 +516,23 @@ def audio_translator(bot, msg, chat_id, content_type, nome):
         nomefiletemporaneo = ''
         numero_randomico_file = str(random.randint(1,100000))
         nomefiletemporaneo = str(chat_id) + numero_randomico_file
-    
-    
+
+
         if content_type == 'voice':
             file_id = msg['voice']['file_id']
-            bot.download_file(file_id, str(nomefiletemporaneo)+".mp3") 
+            bot.download_file(file_id, str(nomefiletemporaneo)+".mp3")
         else:
             """
             Vuol dire che è per forza un audio, e non un messaggio vocale diretto
 
-            Non è neanche un audio che gli viene passato in quanto altrimenti entrerebbe in quello 
+            Non è neanche un audio che gli viene passato in quanto altrimenti entrerebbe in quello
             prima
             """
 
             file_id = msg['audio']['file_id']
-            bot.download_file(file_id, str(nomefiletemporaneo)+".mp3") 
+            bot.download_file(file_id, str(nomefiletemporaneo)+".mp3")
 
-        src = nomefiletemporaneo + ".mp3" 
+        src = nomefiletemporaneo + ".mp3"
         dst = nomefiletemporaneo + ".wav"
 
     else:
@@ -533,10 +541,10 @@ def audio_translator(bot, msg, chat_id, content_type, nome):
 
         # In questo punto viene rimosso il .mp4 e sostituito con .wav
         dst = nome[:-4] + ".wav"
-        
-                                                    
-    
-    """Qua fa la compressione del file audio e lo comprime in wav"""                                                             
+
+
+
+    """Qua fa la compressione del file audio e lo comprime in wav"""
     #os.system("ffmpeg -i " + src + " -acodec pcm_u8 -ab 800k -ar 44100 " + dst)
 
     """ Cambio bitrait mp3 """
@@ -545,26 +553,26 @@ def audio_translator(bot, msg, chat_id, content_type, nome):
     """ Altra prova per la codifica in wav """
     os.system("ffmpeg -i " + src + " " + dst)
     cwd = os.getcwd()
-        
+
     testo_array = []
-    
+
     audio_originale = AudioSegment.from_wav(cwd + '/' + nomefiletemporaneo + ".wav")
-    #audio_originale = AudioSegment.from_file(cwd + "/" + nomefiletemporaneo + ".mp3", format = 'mp3')    
-    
-    
+    #audio_originale = AudioSegment.from_file(cwd + "/" + nomefiletemporaneo + ".mp3", format = 'mp3')
+
+
     try:
         media_chunks_volume = audio_originale.dBFS
     except:
         media_chunks_volume = None
-    
+
 
     if str(media_chunks_volume) != '-inf' and media_chunks_volume is not None:
-        # Split track where the silence is 2 seconds or more and get chunks using 
+        # Split track where the silence is 2 seconds or more and get chunks using
         # the imported function.
         print("media_chunks_volume: ",media_chunks_volume)
         chunks = split_on_silence (
             # Use the loaded audio.
-            audio_originale, 
+            audio_originale,
             # Specify that a silent chunk must be at least 2 seconds or 2000 ms long.
             min_silence_len = 250,
             # Consider a chunk silent if it's quieter than -16 dBFS.
@@ -575,8 +583,8 @@ def audio_translator(bot, msg, chat_id, content_type, nome):
 
         # Ogni volta che salva un file in temporaneo poi fa un .append(nome_chuck) per poterlo poi riprendere
         nomi_file = []
-        
-        
+
+
         # Process each chunk with your parameters
         for i, chunk in enumerate(chunks):
             # Create a silence chunk that's 0.5 seconds (or 500 ms) long for padding.
@@ -595,8 +603,8 @@ def audio_translator(bot, msg, chat_id, content_type, nome):
                 bitrate = "192k",
                 format = "wav"
             )
-                
-            nomi_file.append(chunk_name) 
+
+            nomi_file.append(chunk_name)
     else:
         """
         A questo punto se il volume è troppo basso e non si riesce a capire bene la
@@ -606,16 +614,16 @@ def audio_translator(bot, msg, chat_id, content_type, nome):
         nomi_file = []
         nomi_file.append(dst)
 
-        
-    
 
-    
+
+
+
     if testo_array is None:
         """
-        Vuol dire che la funzione per tagliare i silenzi non è riuscita --> 
-        Appende a nomi_file direttamente il file compresso con ffmpeg 
+        Vuol dire che la funzione per tagliare i silenzi non è riuscita -->
+        Appende a nomi_file direttamente il file compresso con ffmpeg
         """
-        nomi_file.append(dst) 
+        nomi_file.append(dst)
 
 
     try:
@@ -632,11 +640,11 @@ def audio_translator(bot, msg, chat_id, content_type, nome):
                 audio = sr.AudioFile(sound)
                 with audio as source:
                     audio_content = r.record(source)
-                
+
 
                 testo_tradotto_intero = r.recognize_google(
-                                                        audio_content, 
-                                                        language=language 
+                                                        audio_content,
+                                                        language=language
                                                         #show_all=True
                                                         )
 
@@ -644,7 +652,7 @@ def audio_translator(bot, msg, chat_id, content_type, nome):
 
                 if verifica:
                     testo_invio = traduttore('Testo senza eliminazione dei silenzi', language)
-                            
+
                     testo_invio = testo_invio + "\n\n" + testo_tradotto_intero
 
                     bot.sendMessage(chat_id, testo_invio)
@@ -653,14 +661,14 @@ def audio_translator(bot, msg, chat_id, content_type, nome):
                 else:
                     return testo_tradotto_intero
 
-                
+
 
             except Exception as e:
                 """ Error in e """
                 return False, e
 
-        
-        
+
+
 
 
         try:
@@ -671,43 +679,43 @@ def audio_translator(bot, msg, chat_id, content_type, nome):
                 """
 
                 sound = x
-                    
+
                 #Speech recognition
                 audio = sr.AudioFile(sound)
                 with audio as source:
                     audio_content = r.record(source)
-                    
+
                 testo_temporaneo = r.recognize_google(
                                             audio_content,
                                             language=language
                                         )
-                    
+
                 testo_array.append(testo_temporaneo)
 
-                
+
         except:
             """
-            In questo caso se ha riscontrato qualche errore nella traduzione 
+            In questo caso se ha riscontrato qualche errore nella traduzione
             lascia stare e invia solo quello completo
             """
-            
+
             testo_array.clear()
-            nomi_file.clear() 
+            nomi_file.clear()
 
 
 
         testo = ''
         for i, x in enumerate(testo_array):
-            testo = testo + str(x) 
+            testo = testo + str(x)
             if i < len(testo_array) - 1:
                 testo = testo + ", "
 
         bot.deleteMessage((chat_id,int(messaggio['message_id'])))
-        
+
         if testo_array: # If the array is not empty the testo_array return True
             """ Se la traduzione con i silenzi ha funzionato """
             """ Fa la traduzione solamente senza direttamente i silenzi """
-            testo = traduttore("Testo con l'eliminazione dei silenzi", language) + "\n\n" + testo if len(nomi_file) > 1 else testo 
+            testo = traduttore("Testo con l'eliminazione dei silenzi", language) + "\n\n" + testo if len(nomi_file) > 1 else testo
 
             bot.sendMessage(chat_id, testo)
 
@@ -718,54 +726,65 @@ def audio_translator(bot, msg, chat_id, content_type, nome):
             messaggio_eliminazione = bot.sendMessage(chat_id, testo)
 
             if len(nomi_file) < 2:
-                verifica, testo_funzione = audio_direct(bot, dst, language, chat_id) 
+                verifica, testo_funzione = audio_direct(bot, dst, language, chat_id)
                 """
-                testo_funzione è l'errore dell'except che non viene mandato a nessuno 
-                --> per adesso 
+                testo_funzione è l'errore dell'except che non viene mandato a nessuno
+                --> per adesso
                 """
 
             if verifica is False:
-                """ 
-                Vuol dire che non è riuscita a tradurre niente 
+                """
+                Vuol dire che non è riuscita a tradurre niente
                 --> Insolito dato che pydub è riuscito a dividere i momenti
-                
+
                 """
                 bot.deleteMessage( (chat_id, messaggio_eliminazione['message_id']))
 
                 bot.sendMessage(chat_id, traduttore("Scusaci non siamo riusciti a tradurre niente",language))
-                bot.sendMessage(chat_id_admin1, str(testo_funzione))
-
+                if testo_funzione != '':
+                    bot.sendMessage(chat_id_admin1, str(testo_funzione))
+                else:
+                    bot.sendMessage(chat_id, traduttore("Il testo è vuoto", language))
 
 
         if len(nomi_file) > 1:
             """ manda il messaggio in caso si siano divisi anche i silenzi """
             verifica, testo = audio_direct(bot, dst, language, chat_id)
-            
 
-        
+
+
         #""" Richiamo per la lingua"""
         #oggetto = riconoscimento(language, dst)
         #lingua_trovata = oggetto.lingua_possibile_funzione()
         #if lingua_trovata is True:
-        #    """ It means that the audio translate for the settings language 
+        #    """ It means that the audio translate for the settings language
         #    and the language of the audio are the saim """
-        #    
+        #
         #    pass
         #else:
         #    testo = audio_direct(bot, dst, lingua_trovata, chat_id, verifica = False)
-        #    
+        #
         #    testo = traduttore(testo, language)
         #
         #    bot.sendMessage(chat_id, testo)
 
     except Exception as e:
-        messaggiodierrore = "scusami abbiamo avuto questo problema, manda il messaggio a questa mail per avvisare l'amministratore del bot dell'errore, solo se persiste\n\n audiomessagetotex@gmail.com\n\n\n"
+        if "messaggio_eliminazione" in locals():
+            bot.deleteMessage((chat_id, messaggio_eliminazione['message_id']))
+        elif "messaggio" in locals():
+            bot.deleteMessage((chat_id, messaggio_eliminazione['message_id']))
+        else:
+            """ It means there is no messagge send to the chat_id """
+            pass
+
+        bot.sendMessage(chat_id, type(e))
+        messaggiodierrore = "Scusami abbiamo avuto questo problema, manda il messaggio a questa mail per avvisare l'amministratore del bot dell'errore, solo se persiste\n\n audiomessagetotex@gmail.com\n\n\n"
         language = libreria.selectcondizionato(tabella=tabella, campo="chat_id", valore=chat_id, campo2="lingua")[0][0]
         bot.sendMessage(chat_id, traduttore(messaggiodierrore, language) + str(e))
-            
+
     #anno_mese_giorno = str(datetime.now())[:10]
 
-    #if content_type == 'voice' or 'audio':#in caso non esistesse il record prima prova a inserirlo, in caso non esiste lo inserisce lui   
+    #if content_type == 'voice' or 'audio':#in caso non esistesse il record prima prova a inserirlo, in caso non esiste lo inserisce lui
         #audio = libreria.selectcondizionato(tabellaaggiornamento, "giorno", str(anno_mese_giorno), "audiotradotti")[0][0]
         #libreria.update(tabellaaggiornamento, "audiotradotti", str(int(audio)+1), "giorno", str(anno_mese_giorno))
     #elif content_type == 'video_note':
@@ -789,22 +808,22 @@ def add_db(chat_id, content_type = None, lingua = None):
         "video" : "video_tradotti",
         "photo" : "fototradotte"
     }
-    
+
     """ Controllo per quanto riguarda l'esistenza del giorno corrente in 'statistiche' """
     anno_mese_giorno = str(datetime.now())[:10]
     valore = libreria.selectcondizionatodato(tabellaaggiornamento, "giorno", anno_mese_giorno)
     if not valore:
         """ Vuol dire che bisogna aggiungere il giorno perchè c'è già """
-        libreria.insertdue(tabellaaggiornamento, 
-            ["giorno", 
-            "audiotradotti", 
-            "personeregistrate", 
-            "fototradotte", 
-            "video_messaggi_tradotti", 
+        libreria.insertdue(tabellaaggiornamento,
+            ["giorno",
+            "audiotradotti",
+            "personeregistrate",
+            "fototradotte",
+            "video_messaggi_tradotti",
             "video_tradotti"],
-            
-            [anno_mese_giorno, 
-            "0", 
+
+            [anno_mese_giorno,
+            "0",
             "0",
             "0",
             "0",
@@ -815,7 +834,7 @@ def add_db(chat_id, content_type = None, lingua = None):
         """ Vuol dire che la funzione è stata richiamata senza specificare la lingua """
         """ Utenti [user] """
         valore = libreria.selectcondizionato(tabella, "chat_id", chat_id, utenti_valori[content_type])[0][0]
-        
+
         try:
             """
             In case the user didn't have 0 in the db
@@ -826,10 +845,10 @@ def add_db(chat_id, content_type = None, lingua = None):
 
 
         libreria.update(
-            tabella, 
-            utenti_valori[content_type], 
-            str(valore_utente + 1), 
-            "chat_id", 
+            tabella,
+            utenti_valori[content_type],
+            str(valore_utente + 1),
+            "chat_id",
             chat_id
             )
 
@@ -839,7 +858,7 @@ def add_db(chat_id, content_type = None, lingua = None):
             valore = int(valore)
         except:
             valore = 0
-        
+
         try:
             valore_utente = int(valore)
         except:
@@ -847,48 +866,48 @@ def add_db(chat_id, content_type = None, lingua = None):
 
 
         libreria.update(
-            tabellaaggiornamento, 
-            statistiche_valori[content_type], 
-            str(valore_utente + 1), 
-            "giorno", 
+            tabellaaggiornamento,
+            statistiche_valori[content_type],
+            str(valore_utente + 1),
+            "giorno",
             anno_mese_giorno
             )
     elif lingua is not None and content_type is None and not verificachat(chat_id):
         """
         insert per le persone che si iscrivono e fanno /start
         """
-        
-        libreria.insertdue(tabella, 
+
+        libreria.insertdue(tabella,
             [
-                "chat_id", 
-                "lingua", 
-                "audio", 
-                "foto", 
-                "video_messaggi", 
+                "chat_id",
+                "lingua",
+                "audio",
+                "foto",
+                "video_messaggi",
                 "video"
-            ], 
+            ],
             [
-                chat_id, 
-                lingua, 
-                "0", 
-                "0", 
-                "0", 
+                chat_id,
+                lingua,
+                "0",
+                "0",
+                "0",
                 "0"
             ])
-        
+
         valore = libreria.selectcondizionato(tabellaaggiornamento, "giorno", anno_mese_giorno, "personeregistrate")[0][0]
         libreria.update(
-            tabellaaggiornamento, 
-            "personeregistrate", 
-            str(int(valore) + 1), 
-            "giorno", 
+            tabellaaggiornamento,
+            "personeregistrate",
+            str(int(valore) + 1),
+            "giorno",
             anno_mese_giorno
             )
 
-        
+
     else:
         pass
-    #if content_type == 'voice' or 'audio':#in caso non esistesse il record prima prova a inserirlo, in caso non esiste lo inserisce lui   
+    #if content_type == 'voice' or 'audio':#in caso non esistesse il record prima prova a inserirlo, in caso non esiste lo inserisce lui
         #audio = libreria.selectcondizionato(tabellaaggiornamento, "giorno", str(anno_mese_giorno), "audiotradotti")[0][0]
         #libreria.update(tabellaaggiornamento, "audiotradotti", str(int(audio)+1), "giorno", str(anno_mese_giorno))
 
@@ -897,25 +916,25 @@ def add_db(chat_id, content_type = None, lingua = None):
 def scissione(bot, msg, chat_id, content_type):
     """
     verifica = True or False --> if all work fine
-    nome = name of the file in local 
-    e = False or 
+    nome = name of the file in local
+    e = False or
     """
 
     nome_video_temporaneo = str(chat_id) + str(random.randint(1,100000)) + '.mp4'
     file_id = msg['video']['file_id'] if content_type == 'video' else msg['video_note']['file_id']
-    
+
     try:
         bot.download_file(file_id, str(nome_video_temporaneo))
-        
+
         command_shell = "ffmpeg -i " + nome_video_temporaneo + " -ab 600k -ac 2 -ar 44100 -vn " + nome_video_temporaneo[:-4] + ".mp3 > " + "log_" + nome_video_temporaneo[:-4] + ".txt"
-        
+
         os.system(command_shell)
-        
+
         #with open("log_" + nome_video_temporaneo[:-4], "r") as f:
         #    log_scissione = f.readlines()
 
         """
-        Funzione successiva: gestire l'errore di ffmpeg [per adesso non scrive neanche sul log 
+        Funzione successiva: gestire l'errore di ffmpeg [per adesso non scrive neanche sul log
         --> lo lascia vuoto]
         """
         if True:
@@ -928,9 +947,9 @@ def scissione(bot, msg, chat_id, content_type):
             os.system("rm -r " + "log_" + nome_video_temporaneo[:-4] + ".txt")
             return False, None, None
 
-        
+
     except Exception as e:
-        
+
         """
         Errore che ritorna in questa parte dell'except è se qualcosa va male lato python
         In caso di errore nel salvataggio o altre cose
@@ -938,11 +957,11 @@ def scissione(bot, msg, chat_id, content_type):
         """
         s.system("rm -r " + "log_" + nome_video_temporaneo[:-4] + ".txt")
         os.system("rm -r " + nome_video_temporaneo)
-        
+
         return True, None, e
-    
-    
-    
+
+
+
 
 def on_chat_message(msg):
     content_type, chat_type, chat_id = telepot.glance(msg)
@@ -952,7 +971,7 @@ def on_chat_message(msg):
         else:
             start(chat_id, bot, msg, False, True)
         audio_translator(bot, msg, chat_id, content_type, False)
-        
+
     elif content_type == 'text':
         if msg['text'] == '/stato' and (int(chat_id) == int(chat_id_admin1) or int(chat_id) == int(chat_id_admin2)):
             admin(chat_id, bot, msg)
@@ -967,24 +986,24 @@ def on_chat_message(msg):
                 bot.sendMessage(chat_id_admin1,"Non sono riuscito a riavviare il computer") if str(chat_id) != str(chat_id_admin1) else 0
 
 
-        
+
         elif msg['text'] == '/ricompila' and (int(chat_id) == int(chat_id_admin1) or int(chat_id) == int(chat_id_admin2)):
             ricompilazione(bot, msg, chat_id)
         elif msg['text'] == '/aggiornamento' and (int(chat_id) == int(chat_id_admin1) or int(chat_id) == int(chat_id_admin2)):
             anno_mese_giorno = str(datetime.now())[:10]
             if len(libreria.selectcondizionatodato(tabellaaggiornamento, "giorno", str(anno_mese_giorno))) == 0:
                 libreria.insertdue(
-                    tabellaaggiornamento, 
-                    ["giorno", 
-                    "audiotradotti", 
-                    "personeregistrate", 
+                    tabellaaggiornamento,
+                    ["giorno",
+                    "audiotradotti",
+                    "personeregistrate",
                     "fototradotte",
                     "video_messaggi_tradotti",
-                    "video_tradotti"], 
-                    
-                    [str(anno_mese_giorno), 
-                    str(0), 
-                    str(0), 
+                    "video_tradotti"],
+
+                    [str(anno_mese_giorno),
+                    str(0),
+                    str(0),
                     str(0),
                     str(0),
                     str(0)])
@@ -1002,7 +1021,7 @@ def on_chat_message(msg):
                     video_tradotti = str(x[5])
 
                     risultato_utenti = libreria.selectcompleta(tabella)
-                    
+
                     audio_tradotti_totali = 0
                     foto_tradotte_totali = 0
                     video_messaggi_tradotti_totali = 0
@@ -1017,22 +1036,22 @@ def on_chat_message(msg):
                             foto_tradotte_totali = foto_tradotte_totali + int(k[3])
                         except:
                             pass
-                        
-                        
+
+
                         try:
                             video_messaggi_tradotti_totali = video_messaggi_tradotti_totali + int(k[4])
                         except:
                             pass
-                        
+
                         try:
                             video_tradotti_totali = video_tradotti_totali + int(k[5])
                         except:
                             pass
                     testo = 'Audio tradotti oggi: ' + str(audio_tradotti) + "\nPersone registrate oggi: " + str(persone_registrate) + "\nFoto tradotte oggi: " + str(foto_tradotte) +"\nVideo messaggi tradotti: " + str(video_messaggi_tradotti) +"\nVideo tradotti: " + str(video_tradotti) +"\n\nUtenti in totale: " + str(len(risultato_utenti)) + "\nAudio totali: " + str(audio_tradotti_totali) + "\nFoto tradotte in totale: " + str(foto_tradotte_totali) + "\nVideo tradotti: " + str(video_messaggi_tradotti_totali) + "\nVideo tradotti in totale: " + str(video_tradotti_totali)
                     bot.sendMessage(chat_id, testo)
-                    
+
         elif msg['text'] == '/comandi' and str(chat_id) == str(chat_id_admin1):
-            testo = """  
+            testo = """
             /messaggioatutti 1.00 ciao
             /ricompila ricompila il file che c'è già
             invia un file chiamato ricerca.py e lui lo ricompilerà
@@ -1041,7 +1060,7 @@ def on_chat_message(msg):
 
         elif msg['text'][:16] == '/messaggioatutti' and (int(chat_id) == int(chat_id_admin1) or int(chat_id) == int(chat_id_admin2)):
             adminstatistiche(chat_id, bot, msg, False, False)
-            
+
 
         elif msg['text'] == '/sponsor':
             language = libreria.selectcondizionato(tabella=tabella, campo="chat_id", valore=chat_id, campo2="lingua")[0][0]
@@ -1053,18 +1072,18 @@ def on_chat_message(msg):
                 start(chat_id, bot, msg, True, True)#se True vuol dire che è registrato, secondo False vuol dire che non ha chiesto di cambiare la lingua
             else:
                 start(chat_id, bot, msg, False, True)#se False vuol dire che non è ancora registrato, secondo False vuol dire che non ha chiesto di cambiare la lingua
-            
+
             pubblicita(chat_id, bot, msg)
             language = libreria.selectcondizionato(tabella=tabella, campo="chat_id", valore=chat_id, campo2="lingua")[0][0]
-            bot.sendMessage(chat_id, 
+            bot.sendMessage(chat_id,
                 traduttore("Inoltrami un media (messaggio vocale, video messaggio, video, foto, o un file audio) e io lo tradurrò in testo.\n Se vuoi inviarmi una foto ritagliala sulla parte che ti interessa convertire in testo.", language))
-        
+
         elif msg['text'] == '/donate':
             if verificachat(chat_id):
                 pass
             else:
                 start(chat_id, bot, msg, False, True)#crea dicendogli che ha capito una lingua
-            
+
             pubblicitadonate(chat_id, bot, msg)
 
         elif msg['text'] == '/setlanguage':
@@ -1072,7 +1091,7 @@ def on_chat_message(msg):
                 pass
             else:
                 start(chat_id, bot, msg, False, False)#se False vuol dire che non è ancora registrato, il secondo per dirgli che deve registrarlo senza output, con la lingua inglese
-            
+
             language = libreria.selectcondizionato(tabella, "chat_id", chat_id, "lingua")[0][0]
             messaggio = traduttore("Setta la tua lingua",language) + "\n"
             for x in lingue:
@@ -1084,7 +1103,7 @@ def on_chat_message(msg):
                 pass
             else:
                 start(chat_id, bot, msg, False, True)#se False vuol dire che non è ancora registrato, il secondo per dirgli che deve registrarlo senza output, con la lingua inglese
-            
+
             language = libreria.selectcondizionato(tabella, "chat_id", chat_id, "lingua")[0][0]
             testo = "Il bot registra l'utente e i suoi settaggi come la lingua e il chat id in modo da non dover reimpostare ogni volta la lingua.\nI messaggi vocali inviati vengono cancellati non appena vengono tradotti in testo e quest'ultimo non può essere richiamato o ricercato in nessun modo all'interno del log.\nIn questo modo solamente voi potete conoscere il contenuto dei vostri audio e la relativa trascrizione."
             testo = traduttore(testo, language)
@@ -1106,21 +1125,21 @@ def on_chat_message(msg):
                 pass
             else:
                 start(chat_id, bot, msg, False, False)#lo crea zitto con lingua = en-GB
-                
+
             controllo = False
             for y, x in lingue.items():
                 if x == msg['text']:
                     language = y
-                    
+
                     libreria.update(tabella, "lingua", language, "chat_id", chat_id)
                     controllo = True
             if controllo:
                 bot.sendMessage(chat_id, (traduttore("Lingua impostata correttamente su",language) + " " + str(lingue[language])[1:]))
             else:
-                #se non capisco che lingua mi ha chiesto di impostare, o se sta cercando un comando che non esiste 
+                #se non capisco che lingua mi ha chiesto di impostare, o se sta cercando un comando che non esiste
                 language = libreria.selectcondizionato(tabella=tabella, campo="chat_id", valore=chat_id, campo2="lingua")[0][0]
                 bot.sendMessage(chat_id, ((traduttore("Scusami non sono ancora in grado di settare questa lingua o di fare la cosa che mi hai chiesto, se vuoi cambiare una lingua devi digitare",language) + " /setlanguage\n\n" +traduttore("Se hai dei consigli o per qualunque segnalazione scrivi a audiomessagetotex@gmail.com",language))))
-            
+
 
         else:
             #in caso mi ha mandato un testo o dello scritto
@@ -1132,13 +1151,13 @@ def on_chat_message(msg):
 
             language = libreria.selectcondizionato(tabella=tabella, campo="chat_id", valore=chat_id, campo2="lingua")[0][0]#prende la lingua dal db in caso l'abbia cambiata
 
-            bot.sendMessage(chat_id, traduttore("Scusami non sono ancora in grado si fare quello che mi hai chiesto", language))   
-    
+            bot.sendMessage(chat_id, traduttore("Scusami non sono ancora in grado si fare quello che mi hai chiesto", language))
+
     elif content_type == 'photo':#in caso sia un immagine o qualcosa d'altro
         controllo = True
         if str(chat_id) == str(chat_id_admin1) or str(chat_id) == str(chat_id_admin2):
             controllo = amministratorefoto(bot, msg, chat_id)
-            
+
         if controllo:
             riconoscimentofoto(bot, msg, chat_id)
 
@@ -1153,11 +1172,11 @@ def on_chat_message(msg):
                 traduttore("Scusa ho avuto questo problema", language) + " " + str(e))
 
             bot.sendMessage(chat_id_admin1, "video" + str(e)) if chat_id_admin1 != chat_id else 0
-    elif content_type == 'document':            
+    elif content_type == 'document':
         """
         If the file the bot reciving is a py, he download it in the saim folder and compile with the systemd service
-        Only if the file that the admin send is name ricerca.py it will compile it --> In any other case it will send 
-        a message to aller him of the name of the file [if he want to compile it] 
+        Only if the file that the admin send is name ricerca.py it will compile it --> In any other case it will send
+        a message to aller him of the name of the file [if he want to compile it]
         """
 
         if str(chat_id) == str(chat_id_admin1):
@@ -1175,11 +1194,11 @@ def on_chat_message(msg):
 
     else:
         """
-        In caso gli arrivi qualche cosa che non è in grado di gestire 
+        In caso gli arrivi qualche cosa che non è in grado di gestire
         """
         language = libreria.selectcondizionato(tabella, "chat_id", chat_id, "lingua")[0][0]
         bot.sendMessage(chat_id, traduttore("Scusami non sono ancora in grado di fare quello che mi hai chiesto", language))
-        
+
 
 language = 'en-GB'
 bot = telepot.Bot(TOKEN)
@@ -1192,5 +1211,3 @@ bot.message_loop(on_chat_message)
 
 while True:
     time.sleep(10)
-
-
