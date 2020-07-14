@@ -46,8 +46,7 @@ with open("config.json",) as f:
     data = json.load(f)
 
 
-#chat_id_admin1 = '56248707'
-#chat_id_admin2 = '632278771'
+
 
 chat_id_admin1 = data['chat_id_admin1']
 chat_id_admin2 = data['chat_id_admin2']
