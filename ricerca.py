@@ -46,8 +46,6 @@ with open("config.json",) as f:
     data = json.load(f)
 
 
-
-
 chat_id_admin1 = data['chat_id_admin1']
 chat_id_admin2 = data['chat_id_admin2']
 
@@ -965,10 +963,9 @@ def scissione(bot, msg, chat_id, content_type):
 def on_chat_message(msg):
     content_type, chat_type, chat_id = telepot.glance(msg)
     if content_type == 'voice' or content_type == 'audio':
-        if verificachat(chat_id):#true ha l'account
-            pass
-        else:
+        if not verificachat(chat_id):#true ha l'account
             start(chat_id, bot, msg, False, True)
+
         audio_translator(bot, msg, chat_id, content_type, False)
 
     elif content_type == 'text':
@@ -986,9 +983,9 @@ def on_chat_message(msg):
 
 
 
-        elif msg['text'] == '/ricompila' and (int(chat_id) == int(chat_id_admin1) or int(chat_id) == int(chat_id_admin2)):
+        elif msg['text'][:10] == '/ricompila' and (int(chat_id) == int(chat_id_admin1) or int(chat_id) == int(chat_id_admin2)):
             ricompilazione(bot, msg, chat_id)
-        elif msg['text'] == '/aggiornamento' and (int(chat_id) == int(chat_id_admin1) or int(chat_id) == int(chat_id_admin2)):
+        elif msg['text'][:14] == '/aggiornamento' and (int(chat_id) == int(chat_id_admin1) or int(chat_id) == int(chat_id_admin2)):
             anno_mese_giorno = str(datetime.now())[:10]
             if len(libreria.selectcondizionatodato(tabellaaggiornamento, "giorno", str(anno_mese_giorno))) == 0:
                 libreria.insertdue(
@@ -1049,7 +1046,7 @@ def on_chat_message(msg):
                     testo = 'Audio tradotti oggi: ' + str(audio_tradotti) + "\nPersone registrate oggi: " + str(persone_registrate) + "\nFoto tradotte oggi: " + str(foto_tradotte) +"\nVideo messaggi tradotti: " + str(video_messaggi_tradotti) +"\nVideo tradotti: " + str(video_tradotti) +"\n\nUtenti in totale: " + str(len(risultato_utenti)) + "\nAudio totali: " + str(audio_tradotti_totali) + "\nFoto tradotte in totale: " + str(foto_tradotte_totali) + "\nVideo tradotti: " + str(video_messaggi_tradotti_totali) + "\nVideo tradotti in totale: " + str(video_tradotti_totali)
                     bot.sendMessage(chat_id, testo)
 
-        elif msg['text'] == '/comandi' and str(chat_id) == str(chat_id_admin1):
+        elif msg['text'][:8] == '/comandi' and str(chat_id) == str(chat_id_admin1):
             testo = """
             /messaggioatutti 1.00 ciao
             /ricompila ricompila il file che c'è già
@@ -1061,12 +1058,12 @@ def on_chat_message(msg):
             adminstatistiche(chat_id, bot, msg, False, False)
 
 
-        elif msg['text'] == '/sponsor':
+        elif msg['text'][:8] == '/sponsor':
             language = libreria.selectcondizionato(tabella=tabella, campo="chat_id", valore=chat_id, campo2="lingua")[0][0]
             testo = traduttore('Per tutte le info, prezzi e modalità per le sponsorizzazioni (la tua pubblicità in questo canale) scrivi all’indirizzo mail:', language) + " audiomessagetotex@gmail.com."
             bot.sendMessage(chat_id, testo)
 
-        elif msg['text'] == '/start':
+        elif msg['text'][:6] == '/start':
             if verificachat(chat_id):
                 start(chat_id, bot, msg, True, True)#se True vuol dire che è registrato, secondo False vuol dire che non ha chiesto di cambiare la lingua
             else:
@@ -1077,7 +1074,7 @@ def on_chat_message(msg):
             bot.sendMessage(chat_id,
                 traduttore("Inoltrami un media (messaggio vocale, video messaggio, video, foto, o un file audio) e io lo tradurrò in testo.\n Se vuoi inviarmi una foto ritagliala sulla parte che ti interessa convertire in testo.", language))
 
-        elif msg['text'] == '/donate':
+        elif msg['text'][:7] == '/donate':
             if verificachat(chat_id):
                 pass
             else:
@@ -1085,7 +1082,7 @@ def on_chat_message(msg):
 
             pubblicitadonate(chat_id, bot, msg)
 
-        elif msg['text'] == '/setlanguage':
+        elif msg['text'][:12] == '/setlanguage':
             if verificachat(chat_id):
                 pass
             else:
@@ -1097,10 +1094,8 @@ def on_chat_message(msg):
                 messaggio += str(lingue[x]) + "\n"
             bot.sendMessage(chat_id, messaggio)
 
-        elif msg['text'] == '/privacy':
-            if verificachat(chat_id):
-                pass
-            else:
+        elif msg['text'][:8] == '/privacy':
+            if not verificachat(chat_id):
                 start(chat_id, bot, msg, False, True)#se False vuol dire che non è ancora registrato, il secondo per dirgli che deve registrarlo senza output, con la lingua inglese
 
             language = libreria.selectcondizionato(tabella, "chat_id", chat_id, "lingua")[0][0]
@@ -1108,9 +1103,9 @@ def on_chat_message(msg):
             testo = traduttore(testo, language)
             bot.sendMessage(chat_id, testo)
 
-        elif msg['text'] == '/sourcecode':
+        elif msg['text'][:11] == '/sourcecode':
             """
-            It print the link for github
+            It send the link for the repo in github
             """
             language = libreria.selectcondizionato(tabella, "chat_id", chat_id, "lingua")[0][0]
             testo = traduttore("Se vuoi leggere il codice sorgente del bot clicca su", language) + " https://github.com/giacomogroppi/audio_translator_telegram"
@@ -1120,20 +1115,18 @@ def on_chat_message(msg):
             """
             Cerca di capire se il comando / è per settare una lingua
             """
-            if verificachat(chat_id):
-                pass
-            else:
+            if not verificachat(chat_id):
                 start(chat_id, bot, msg, False, False)#lo crea zitto con lingua = en-GB
 
             controllo = False
             for y, x in lingue.items():
-                if x == msg['text']:
+                if x == msg['text'][:len(x)]:
                     language = y
 
                     libreria.update(tabella, "lingua", language, "chat_id", chat_id)
                     controllo = True
             if controllo:
-                bot.sendMessage(chat_id, (traduttore("Lingua impostata correttamente su",language) + " " + str(lingue[language])[1:]))
+                bot.sendMessage(chat_id, (traduttore("Lingua impostata correttamente su",language) + " " + str(lingue[language])[1:].lower()))
             else:
                 #se non capisco che lingua mi ha chiesto di impostare, o se sta cercando un comando che non esiste
                 language = libreria.selectcondizionato(tabella=tabella, campo="chat_id", valore=chat_id, campo2="lingua")[0][0]
@@ -1141,18 +1134,15 @@ def on_chat_message(msg):
 
 
         else:
-            #in caso mi ha mandato un testo o dello scritto
-            if verificachat(chat_id):
-                pass #pass perchè tanto la recupero dopo la lingua [solo in caso l'account già esiste]
-                # language = libreria.selectcondizionato("utenti", "chat_id", chat_id, "lingua")
-            else:
+            # in caso mi ha mandato un testo o dello scritto
+            if not verificachat(chat_id):
                 start(chat_id, bot, msg, False, True)#capisce zitto che lingua ha settato su telegram
 
             language = libreria.selectcondizionato(tabella=tabella, campo="chat_id", valore=chat_id, campo2="lingua")[0][0]#prende la lingua dal db in caso l'abbia cambiata
 
             bot.sendMessage(chat_id, traduttore("Scusami non sono ancora in grado si fare quello che mi hai chiesto", language))
 
-    elif content_type == 'photo':#in caso sia un immagine o qualcosa d'altro
+    elif content_type == 'photo' and chat_type != 'group': # in caso sia un immagine o qualcosa d'altro
         controllo = True
         if str(chat_id) == str(chat_id_admin1) or str(chat_id) == str(chat_id_admin2):
             controllo = amministratorefoto(bot, msg, chat_id)
@@ -1161,7 +1151,13 @@ def on_chat_message(msg):
             riconoscimentofoto(bot, msg, chat_id)
 
     elif content_type == 'video' or content_type == 'video_note':
+        if not verificachat(chat_id):
+            """ It means the user is not register in the db """
+            start(chat_id, bot, msg, False, False)
+
+
         verifica, nome, e = scissione(bot, msg, chat_id, content_type)
+        
         if verifica:
             audio_translator(bot, msg, chat_id, content_type, nome)
         else:
@@ -1177,6 +1173,11 @@ def on_chat_message(msg):
         Only if the file that the admin send is name ricerca.py it will compile it --> In any other case it will send
         a message to aller him of the name of the file [if he want to compile it]
         """
+
+        if not verificachat(chat_id):
+            """ It means the user is not register in the db """
+            start(chat_id, bot, msg, False, False)
+
 
         if str(chat_id) == str(chat_id_admin1):
             if msg['document']['file_name'] == 'ricerca.py':
@@ -1195,8 +1196,9 @@ def on_chat_message(msg):
         """
         In caso gli arrivi qualche cosa che non è in grado di gestire
         """
-        language = libreria.selectcondizionato(tabella, "chat_id", chat_id, "lingua")[0][0]
-        bot.sendMessage(chat_id, traduttore("Scusami non sono ancora in grado di fare quello che mi hai chiesto", language))
+        if chat_type != 'group':
+            language = libreria.selectcondizionato(tabella, "chat_id", chat_id, "lingua")[0][0]
+            bot.sendMessage(chat_id, traduttore("Scusami non sono ancora in grado di fare quello che mi hai chiesto", language))
 
 
 language = 'en-GB'
