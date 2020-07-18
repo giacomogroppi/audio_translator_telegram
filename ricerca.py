@@ -512,7 +512,7 @@ def audio_translator(bot, msg, chat_id, content_type, nome):
     if not nome:
         nomefiletemporaneo = ''
         numero_randomico_file = str(random.randint(1,100000))
-        nomefiletemporaneo = str(chat_id) + numero_randomico_file
+        nomefiletemporaneo = str(abs(chat_id)) + numero_randomico_file
 
 
         if content_type == 'voice':
@@ -641,25 +641,29 @@ def audio_translator(bot, msg, chat_id, content_type, nome):
 
                 testo_tradotto_intero = r.recognize_google(
                                                         audio_content,
-                                                        language=language
-                                                        #show_all=True
+                                                        language=language,
+                                                        show_all=True
                                                         )
 
+                print(testo_tradotto_intero)
 
+                if not testo_tradotto_intero:
+                    """ If it is [] --> return false and '' """
+                    return False, ''
+
+                testo_tradotto_intero = testo_tradotto_intero['alternative'][0]['transcript']
 
                 if verifica:
                     testo_invio = traduttore('Testo senza eliminazione dei silenzi', language)
 
                     testo_invio = testo_invio + "\n\n" + testo_tradotto_intero
 
-                    bot.sendMessage(chat_id, testo_invio)
+                    bot.sendMessage(chat_id, testo_invio, reply_to_message_id=msg['message_id'])
                     return True, testo_invio
 
                 else:
-                    return testo_tradotto_intero
-
-
-
+                    return True, testo_tradotto_intero
+            
             except Exception as e:
                 """ Error in e """
                 return False, e
@@ -714,70 +718,82 @@ def audio_translator(bot, msg, chat_id, content_type, nome):
             """ Fa la traduzione solamente senza direttamente i silenzi """
             testo = traduttore("Testo con l'eliminazione dei silenzi", language) + "\n\n" + testo if len(nomi_file) > 1 else testo
 
-            bot.sendMessage(chat_id, testo)
+            bot.sendMessage(
+                chat_id, 
+                testo, 
+                reply_to_message_id=msg['message_id']
+                )
 
 
         else:
             """ Se la traduzione con i silenzi ha fallito """
             testo = traduttore('Scusami non sono riuscito a eliminare i silenzi e sostituirli con le virgole', language)
-            messaggio_eliminazione = bot.sendMessage(chat_id, testo)
+            messaggio_eliminazione = bot.sendMessage(
+                chat_id, 
+                testo, 
+                reply_to_message_id=msg['message_id']
+                )
 
             if len(nomi_file) < 2:
-                verifica, testo_funzione = audio_direct(bot, dst, language, chat_id)
-                """
-                testo_funzione è l'errore dell'except che non viene mandato a nessuno
-                --> per adesso
-                """
-
-            if verifica is False:
-                """
-                Vuol dire che non è riuscita a tradurre niente
-                --> Insolito dato che pydub è riuscito a dividere i momenti
-
-                """
-                bot.deleteMessage( (chat_id, messaggio_eliminazione['message_id']))
-
-                bot.sendMessage(chat_id, traduttore("Scusaci non siamo riusciti a tradurre niente",language))
-                if testo_funzione != '':
-                    bot.sendMessage(chat_id_admin1, str(testo_funzione))
+                bot.deleteMessage((chat_id, messaggio_eliminazione['message_id']))
+                verifica, testo_funzione = audio_direct(bot, dst, language, chat_id, False)
+                if verifica:
+                    bot.sendMessage(chat_id, testo_funzione, reply_to_message_id=msg['message_id'])
+                
+                
                 else:
-                    bot.sendMessage(chat_id, traduttore("Il testo è vuoto", language))
 
+                    """
+
+                    Vuol dire che non è riuscito a tradurre niente
+                    --> o è vuoto
+                    --> o è un errore
+
+                    """
+                    try:
+                        bot.deleteMessage( (chat_id, messaggio_eliminazione['message_id']))
+                    except:
+                        pass
+
+
+                    if isinstance(testo_funzione, str):
+                        if testo_funzione == '':
+                            #bot.deleteMessage((chat_id, niente['message_id']))
+                            bot.sendMessage(chat_id, traduttore("Il messaggio è vuoto", language), reply_to_message_id=msg['message_id'])
+
+                    else:    
+                        bot.sendMessage(chat_id, traduttore("Scusaci non siamo riusciti a tradurre niente",language))
+
+            
+            # bot.sendMessage(chat_id, str(testo_funzione), reply_to_message_id=msg['message_id'])
+            
 
         if len(nomi_file) > 1:
             """ manda il messaggio in caso si siano divisi anche i silenzi """
             verifica, testo = audio_direct(bot, dst, language, chat_id)
 
 
-
-        #""" Richiamo per la lingua"""
-        #oggetto = riconoscimento(language, dst)
-        #lingua_trovata = oggetto.lingua_possibile_funzione()
-        #if lingua_trovata is True:
-        #    """ It means that the audio translate for the settings language
-        #    and the language of the audio are the saim """
-        #
-        #    pass
-        #else:
-        #    testo = audio_direct(bot, dst, lingua_trovata, chat_id, verifica = False)
-        #
-        #    testo = traduttore(testo, language)
-        #
-        #    bot.sendMessage(chat_id, testo)
-
     except Exception as e:
         if "messaggio_eliminazione" in locals():
-            bot.deleteMessage((chat_id, messaggio_eliminazione['message_id']))
+            try:
+                bot.deleteMessage((chat_id, messaggio_eliminazione['message_id']))
+            except:
+                pass
+
         elif "messaggio" in locals():
-            bot.deleteMessage((chat_id, messaggio_eliminazione['message_id']))
+            try:
+                bot.deleteMessage((chat_id, messaggio_eliminazione['message_id']))
+            except:
+                pass
+
         else:
             """ It means there is no messagge send to the chat_id """
             pass
-
-        bot.sendMessage(chat_id, type(e))
+        
+        
         messaggiodierrore = "Scusami abbiamo avuto questo problema, manda il messaggio a questa mail per avvisare l'amministratore del bot dell'errore, solo se persiste\n\n audiomessagetotex@gmail.com\n\n\n"
         language = libreria.selectcondizionato(tabella=tabella, campo="chat_id", valore=chat_id, campo2="lingua")[0][0]
-        bot.sendMessage(chat_id, traduttore(messaggiodierrore, language) + str(e))
+        bot.sendMessage(chat_id, traduttore(messaggiodierrore, language) + str(e), reply_to_message_id=msg['message_id'])
 
     #anno_mese_giorno = str(datetime.now())[:10]
 
@@ -787,7 +803,7 @@ def audio_translator(bot, msg, chat_id, content_type, nome):
     #elif content_type == 'video_note':
     add_db(chat_id, content_type)
 
-    os.system("rm -r " + str(chat_id) + "*")
+    os.system("rm -r " + str(abs(chat_id)) + "*")
 
 
 def add_db(chat_id, content_type = None, lingua = None):
@@ -917,7 +933,7 @@ def scissione(bot, msg, chat_id, content_type):
     e = False or
     """
 
-    nome_video_temporaneo = str(chat_id) + str(random.randint(1,100000)) + '.mp4'
+    nome_video_temporaneo = str(abs(chat_id)) + str(random.randint(1,100000)) + '.mp4'
     file_id = msg['video']['file_id'] if content_type == 'video' else msg['video_note']['file_id']
 
     try:
@@ -944,7 +960,8 @@ def scissione(bot, msg, chat_id, content_type):
             os.system("rm -r " + "log_" + nome_video_temporaneo[:-4] + ".txt")
             return False, None, None
 
-
+        import sys
+        sys.exit("siamo qua, ho finito la scissione")
     except Exception as e:
 
         """
@@ -956,12 +973,14 @@ def scissione(bot, msg, chat_id, content_type):
         os.system("rm -r " + nome_video_temporaneo)
 
         return True, None, e
-
+    
 
 
 
 def on_chat_message(msg):
+    
     content_type, chat_type, chat_id = telepot.glance(msg)
+
     if content_type == 'voice' or content_type == 'audio':
         if not verificachat(chat_id):#true ha l'account
             start(chat_id, bot, msg, False, True)
@@ -1049,10 +1068,19 @@ def on_chat_message(msg):
         elif msg['text'][:8] == '/comandi' and str(chat_id) == str(chat_id_admin1):
             testo = """
             /messaggioatutti 1.00 ciao
-            /ricompila ricompila il file che c'è già
-            invia un file chiamato ricerca.py e lui lo ricompilerà
+
+            /ricompila ricompila il file che c'è già invia un file chiamato ricerca.py e lui lo ricompilerà
+
+            /reboot riavvia la macchina
+
+            /service riavvia il bottelegram.service
             """
             bot.sendMessage(chat_id, testo)
+
+        elif msg['text'][:8] == '/service' and chat_id == int(chat_id_admin1):
+            os.system("sudo systemctl restart bottelegram.service")
+            time.sleep(0.5)
+            bot.sendMessage(chat_id_admin1, "Non sono riuscito a riavviare il servizio")
 
         elif msg['text'][:16] == '/messaggioatutti' and (int(chat_id) == int(chat_id_admin1) or int(chat_id) == int(chat_id_admin2)):
             adminstatistiche(chat_id, bot, msg, False, False)
@@ -1139,8 +1167,9 @@ def on_chat_message(msg):
                 start(chat_id, bot, msg, False, True)#capisce zitto che lingua ha settato su telegram
 
             language = libreria.selectcondizionato(tabella=tabella, campo="chat_id", valore=chat_id, campo2="lingua")[0][0]#prende la lingua dal db in caso l'abbia cambiata
-
-            bot.sendMessage(chat_id, traduttore("Scusami non sono ancora in grado si fare quello che mi hai chiesto", language))
+        
+            if chat_type == "group":
+                bot.sendMessage(chat_id, traduttore("Scusami non sono ancora in grado si fare quello che mi hai chiesto", language))
 
     elif content_type == 'photo' and chat_type != 'group': # in caso sia un immagine o qualcosa d'altro
         controllo = True
