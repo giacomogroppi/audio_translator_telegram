@@ -176,7 +176,7 @@ def fork_processes(num_processes: Optional[int], max_restarts: int = None) -> in
         new_id = start_child(id)
         if new_id is not None:
             return new_id
-    # All child processes exited cleanly, so exit the master process
+    # All child processes exited cleanly, so exit the main process
     # instead of just returning to right after the call to
     # fork_processes (which will probably just start up another IOLoop
     # unless the caller checks the return value).

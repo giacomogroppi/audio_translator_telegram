@@ -62,7 +62,7 @@ class ProcessTest(unittest.TestCase):
                 return "http://127.0.0.1:%d%s" % (port, path)
 
             # ensure that none of these processes live too long
-            signal.alarm(5)  # master process
+            signal.alarm(5)  # main process
             try:
                 id = fork_processes(3, max_restarts=3)
                 self.assertTrue(id is not None)
