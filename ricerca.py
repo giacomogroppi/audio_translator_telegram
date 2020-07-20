@@ -1,4 +1,5 @@
-#versione 1 luglio 21:00
+# -*- coding: utf-8 -*-
+#versione 18 luglio 21:03
 
 try:
     import da_importare
@@ -39,10 +40,11 @@ from audio_ritorno import riconoscimento
 
 
 VERSIONE = 'stable'
-VERSIONE = 'testing'
+#VERSIONE = 'testing'
 
+stringa = '/home/ubuntu/bottelegram/config.json' if VERSIONE == 'stable' else 'config.json'
 
-with open("config.json",) as f:
+with open(stringa,) as f:
     data = json.load(f)
 
 
@@ -484,7 +486,7 @@ def salvataggio_file_py(bot, msg, chat_id, content_type):
     try:
         file_id = msg['document']['file_id']
 
-        nome_temporaneo = 'ricerca_copia.py'
+        nome_temporaneo = 'ricerca.py'
 
         os.system("rm -r /home/ubuntu/bottelegram/ricerca.py")
 
@@ -1168,7 +1170,7 @@ def on_chat_message(msg):
 
             language = libreria.selectcondizionato(tabella=tabella, campo="chat_id", valore=chat_id, campo2="lingua")[0][0]#prende la lingua dal db in caso l'abbia cambiata
         
-            if chat_type == "group":
+            if chat_type != "group":
                 bot.sendMessage(chat_id, traduttore("Scusami non sono ancora in grado si fare quello che mi hai chiesto", language))
 
     elif content_type == 'photo' and chat_type != 'group': # in caso sia un immagine o qualcosa d'altro
