@@ -996,8 +996,9 @@ def on_chat_message(msg):
             bot.sendMessage(chat_id,"Riavvio adesso")
             bot.sendMessage(chat_id_admin1,"Riavvio adesso") if str(chat_id) != str(chat_id_admin1) else 0
             try:
+                pass
                 #Non serve l'autentificazione del superuser in quanto viene eseguito lato systemd [quindi come super user direttamente]
-                os.system("reboot now")
+                # os.system("reboot now")
             except:
                 bot.sendMessage(chat_id, "Non sono riuscito a riavviare il computer")
                 bot.sendMessage(chat_id_admin1,"Non sono riuscito a riavviare il computer") if str(chat_id) != str(chat_id_admin1) else 0
@@ -1080,7 +1081,8 @@ def on_chat_message(msg):
             bot.sendMessage(chat_id, testo)
 
         elif msg['text'][:8] == '/service' and chat_id == int(chat_id_admin1):
-            os.system("sudo systemctl restart bottelegram.service")
+            bot.leaveChat
+            # os.system("sudo systemctl restart bottelegram.service")
             time.sleep(0.5)
             bot.sendMessage(chat_id_admin1, "Non sono riuscito a riavviare il servizio")
 

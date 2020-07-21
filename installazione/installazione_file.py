@@ -1,10 +1,14 @@
 import os 
+
+os.system("./pip.sh")
+os.system("sudo ./pip.sh")
+
 posizione_file = os.getcwd()
 
 posizione_file = posizione_file[:-13]
 
 with open("bottelegram.service", 'w') as f:
-    testo = '\n[Unit]\nDescription=ciao\nAfter=mysql.service\n\n[Service]\nExecStart=' + str(posizione_file) + 'dist/ricerca'
+    testo = '\n[Unit]\nDescription=ciao\nAfter=mysql.service\n\n[Service]\nWorkingDirectory=' + str(posizione_file) + '/\nExecStart=' + str(posizione_file) + 'dist/ricerca'
     f.write(testo)
     f.write('\n[Install]\nWantedBy=network-online.target')
 
