@@ -995,14 +995,10 @@ def on_chat_message(msg):
         elif msg['text'] == '/reboot' and (int(chat_id) == int(chat_id_admin1) or int(chat_id) == int(chat_id_admin2)):
             bot.sendMessage(chat_id,"Riavvio adesso")
             bot.sendMessage(chat_id_admin1,"Riavvio adesso") if str(chat_id) != str(chat_id_admin1) else 0
-            try:
-                pass
-                #Non serve l'autentificazione del superuser in quanto viene eseguito lato systemd [quindi come super user direttamente]
-                # os.system("reboot now")
-            except:
-                bot.sendMessage(chat_id, "Non sono riuscito a riavviare il computer")
-                bot.sendMessage(chat_id_admin1,"Non sono riuscito a riavviare il computer") if str(chat_id) != str(chat_id_admin1) else 0
-
+            
+            subprocess.Popen(['python', 'riavvio.py', 'riavvia'])
+            
+            bot.sendMessage(chat_id_admin1, "avviata")
 
 
         elif msg['text'][:10] == '/ricompila' and (int(chat_id) == int(chat_id_admin1) or int(chat_id) == int(chat_id_admin2)):
@@ -1081,9 +1077,7 @@ def on_chat_message(msg):
             bot.sendMessage(chat_id, testo)
 
         elif msg['text'][:8] == '/service' and chat_id == int(chat_id_admin1):
-            bot.leaveChat
-            # os.system("sudo systemctl restart bottelegram.service")
-            time.sleep(0.5)
+            subprocess.Popen(['python', 'riavvio.py', 'servizio'])
             bot.sendMessage(chat_id_admin1, "Non sono riuscito a riavviare il servizio")
 
         elif msg['text'][:16] == '/messaggioatutti' and (int(chat_id) == int(chat_id_admin1) or int(chat_id) == int(chat_id_admin2)):
